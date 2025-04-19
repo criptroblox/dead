@@ -1,31 +1,38 @@
 local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local hrp = character:WaitForChild("HumanoidRootPart")
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
 
--- Конечная точка (замени на актуальные координаты)
-local endPos = Vector3.new(1000, 5, -200)
+-- Создание платформы
+local platform = Instance.new("Part")
+platform.Size = Vector3.new(6, 1, 6)
+platform.Anchored = true
+platform.Transparency = 1
+platform.CanCollide = true
+platform.Position = hrp.Position - Vector3.new(0, 3, 0)
+platform.Name = "AutoPlatform"
+platform.Parent = workspace
 
 -- Кнопка
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 local button = Instance.new("TextButton", gui)
 button.Size = UDim2.new(0, 200, 0, 50)
 button.Position = UDim2.new(0.5, -100, 0.8, 0)
-button.Text = "Медленно к финишу"
+button.Text = "Ехать вперёд"
 button.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 button.TextColor3 = Color3.fromRGB(255, 255, 255)
 button.Font = Enum.Font.SourceSansBold
 button.TextSize = 20
 
--- Пошаговый телепорт
-local function smoothTeleport()
-    local steps = 50 -- чем больше, тем плавнее и безопаснее
-    local waitTime = 0.1 -- задержка между шагами
-    local direction = (endPos - hrp.Position) / steps
+-- Движение платформы
+local moving = false
 
-    for i = 1, steps do
-        hrp.CFrame = hrp.CFrame + direction
-        wait(waitTime)
+button.MouseButton1Click:Connect(function()
+    moving = not moving
+    button.Text = moving and "Стоп" or "Ехать вперёд"
+
+    while moving and platform do
+        platform.Position = platform.Position + Vector3.new(0, 0, -1.5) -- Направление движения
+        hrp.CFrame = CFrame.new(platform.Position + Vector3.new(0, 3, 0))
+        wait(0.05)
     end
-end
-
-button.MouseButton1Click:Connect(smoothTeleport)
+end)
